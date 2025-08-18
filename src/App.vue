@@ -1,25 +1,31 @@
 <script setup>
 import Home from "./components/Home.vue";
 import Details from "./components/Details.vue";
+import Cart from "./components/Cart.vue";
 import { ref, computed } from "vue";
-const routes = {
-  "/": Home,
-  "/details": Details,
-};
 
-const currentPath = ref(window.location.hash);
+// const routes = {
+//   "/": Home,
+//   "/details": Details,
+//   "/cart": Cart,
+// };
 
-window.addEventListener("hashchange", () => {
-  currentPath.value = window.location.hash;
-});
+// const currentPath = ref(window.location.hash);
 
-const currentView = computed(() => {
-  return routes[currentPath.value.slice(1) || "/"] || NotFound;
-});
+// window.addEventListener("hashchange", () => {
+//   currentPath.value = window.location.hash;
+// });
+
+// const currentView = computed(() => {
+//   return routes[currentPath.value.slice(1) || "/"] || NotFound;
+// });
 </script>
 
 <template>
-  <component :is="currentView" />
+  <!-- <component :is="currentView" /> -->
+
+  <!-- <Home /> -->
+  <router-view />
 </template>
 
 <style scoped></style>

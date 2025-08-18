@@ -1,7 +1,15 @@
 <script setup>
 import Header from "./Header.vue";
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+const sizes = ["S", "M", "L"];
+const selectedSize = ref(null);
+const colors = ["White", "Red", "Black"];
+const selectedColor = ref(null);
+
+
 </script>
-import cardItems from "./com"
 
 <template>
   <Header />
@@ -23,20 +31,17 @@ import cardItems from "./com"
 
         <div class="flex flex-wrap gap-2">
           <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
+            v-for="color in colors"
+            :key="color"
+            @click="selectedColor = color"
+            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium border-primary-500"
+            :class="
+              selectedColor === color
+                ? 'border-orange-500'
+                : 'border-primary-500 '
+            "
           >
-            <p class="text-center font-medium text-gray-700">White</p>
-          </button>
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">Red</p>
-          </button>
-
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">Black</p>
+            <p class="text-center font-medium text-gray-700">{{ color }}</p>
           </button>
         </div>
 
@@ -44,66 +49,65 @@ import cardItems from "./com"
           Choose Size
         </p>
 
-        <div class="flex flex-wrap mb-3x gap-2">
+        <div class="flex flex-wrap mb-3 gap-2">
           <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
+            v-for="size in sizes"
+            :key="size"
+            @click="selectedSize = size"
+            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium transition-colors"
+            :class="
+              selectedSize === size
+                ? 'border-orange-500'
+                : 'border-primary-500 hover:bg-gray-50'
+            "
           >
-            <p class="text-center font-medium text-gray-700">S</p>
-          </button>
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">M</p>
-          </button>
-
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">L</p>
+            <p class="text-center font-medium text-gray-700">{{ size }}</p>
           </button>
         </div>
-
-        <!-- <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-minus"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            stroke-width="4"
-            stroke="#202020"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg> -->
-
         <div class="mt-[28px] flex gap-[6px]">
           <button
             class="btn-secondary border-gray-200 hover:bg-gray-50 h-[55px] w-[55px] p-0"
           >
             -
           </button>
+          <div
+            class="btn-secondary cursor-auto border-gray-200 hover:bg-gray-50 text-black text-[18px] w-[64px]"
+          >
+            1
+          </div>
           <button
             class="btn-secondary border-gray-200 hover:bg-gray-50 h-[55px] w-[55px] p-0"
           >
             +
           </button>
 
-          <a
-            href="#"
-            class="w-fit px-6 py-3 transition rounded-md border border-transparent bg-[#ff922b] px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-[#fd7e14] h-[55px]"
-            >ADD TO CART</a
+          <RouterLink
+            to="/cart"
+            class="w-fit px-6 py-3 transition rounded-md border border-transparent bg-[#ff922b] px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-[#fd7e14] h-[55px] inline-flex items-center justify-center"
+            >ADD TO CART</RouterLink
           >
         </div>
-
-        <!-- 
-        <button
-          class="w-fit px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          Add to Cart
-        </button> -->
+        <hr class="mt-10 my-4 border-gray-300" />
+        <div><p class="font-semibold text-[16px]">Description</p></div>
+        <div class="mt-5 overflow-wrap: break-word text-justify">
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+            Perspiciatis dolor recusandae unde id similique quae maiores
+            deserunt magni error, iste vitae, quo laudantium minus. Blanditiis
+            quis minus possimus alias dolorum.
+          </p>
+        </div>
+        <div class="mt-5 break-words">
+          <ul class="list-disc pl-5">
+            <li><strong>Premium cotton</strong> for everyday comfort</li>
+            <li>
+              <strong>Unisex & Regular fit</strong> – perfect for any vibe
+            </li>
+            <li><strong>Nature inspired artwork</strong></li>
+            <li><strong>Available in</strong> Black, White, Beige, and Grey</li>
+            <li><strong>Best In Class Print</strong></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>

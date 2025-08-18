@@ -80,24 +80,23 @@ const cardItems = ref([
 
             <div class="p-8 text-center sm:p-9 md:p-7 xl:p-9 m-10">
               <div>
-                <a
-                  :href="item.buttonLink"
+                <h3
                   class="text-dark dark:text-black hover:text-primary mb-4 block text-xl font-semibold"
                 >
                   {{ item.title }}
-                </a>
+                </h3>
               </div>
               <p
                 class="text-base leading-relaxed text-body-color dark:text-dark-6 mb-7"
               >
                 {{ item.details }}
               </p>
-              <a
-                :href="item.buttonLink"
+              <RouterLink
+                :to="`/details/${item.id}`"
                 class="inline-block py-2 text-base font-medium transition border rounded-full text-body-color hover:border-primary hover:bg-black border-gray-3 px-7 hover:text-white dark:border-dark-3 dark:text-dark-6"
               >
                 {{ item.buttonText }}
-              </a>
+              </RouterLink>
             </div>
           </div>
         </div>
