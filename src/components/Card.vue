@@ -1,70 +1,74 @@
 <script setup>
-import { ref } from "vue";
-import shirt1 from "../assets/shirt1.png";
-import shirt2 from "../assets/shirt2.png";
-import shirt3 from "../assets/shirt3.png";
+import { ref, onMounted } from "vue";
+import { productService } from "../services/api";
 
-const cardItems = ref([
-  {
-    id: 0,
-    image: shirt1,
-    title: "50+ Best creative website themes & templates",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-  {
-    id: 1,
-    image: shirt2,
-    title: "The ultimate UX and UI guide to card design",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-  {
-    id: 2,
-    image: shirt3,
-    title: "Creative Card Component designs graphic elements",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-  {
-    id: 3,
-    image: shirt3,
-    title: "Creative Card Component designs graphic elements",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-  {
-    id: 4,
-    image: shirt3,
-    title: "Creative Card Component designs graphic elements",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-  {
-    id: 5,
-    image: shirt3,
-    title: "Creative Card Component designs graphic elements",
-    details: "Lorem ipsum...",
-    buttonText: "View Details",
-    buttonLink: "#/details",
-  },
-]);
+const cardItems = ref([]);
+const loading = ref(true);
+const error = ref(null);
+
+const fetchProducts = async () => {
+  try {
+    loading.value = true;
+    const products = await productService.getAllProducts();
+    cardItems.value = (products ?? []).map((product, index) => {
+      const id = product?.id ?? product?.product_id ?? index;
+      const title = product?.title ?? product?.name ?? "Untitled";
+      const details = product?.details ?? product?.description ?? "";
+      const price = product?.price ?? 0;
+      const image =
+        product?.image ?? product?.image_url ?? product?.imagePath ?? "";
+
+      return {
+        id,
+        title,
+        details,
+        price,
+        image,
+        buttonText: "View Details",
+        buttonLink: `#/details/${id}`,
+      };
+    });
+  } catch (err) {
+    error.value = "Failed to fetch products";
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchProducts();
+});
 </script>
 
 <template>
   <!-- ====== Cards Section Start ====== -->
   <section class="bg-gray-2 dark:bg-dark pt-20 pb-10 lg:pt-[120px] lg:pb-20">
     <div class="container mx-auto">
-      <div class="flex flex-wrap mx-4">
-        <!-- v-for is on the column element that needs the width/padding classes -->
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-20">
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
+        ></div>
+        <p class="mt-2 text-gray-600">Loading products...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="text-center py-20">
+        <p class="text-red-600">{{ error }}</p>
+        <button
+          @click="fetchProducts"
+          class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div v-else class="flex flex-wrap mx-4">
         <div
           v-for="(item, index) in cardItems"
-          :key="index"
+          :key="item.id"
           class="w-full px-4 md:w-1/2 xl:w-1/3"
         >
           <div
@@ -90,6 +94,9 @@ const cardItems = ref([
                 class="text-base leading-relaxed text-body-color dark:text-dark-6 mb-7"
               >
                 {{ item.details }}
+              </p>
+              <p class="text-lg font-bold text-black-600 mb-4">
+                ${{ item.price }}
               </p>
               <RouterLink
                 :to="`/details/${item.id}`"
