@@ -1,128 +1,154 @@
 <script setup>
+import { ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import { productService } from "../services/api";
 import Header from "./Header.vue";
+import { useCart } from "../stores/cart.js";
+
+const props = defineProps({
+  id: { type: [String, Number], required: false },
+});
+
+const route = useRoute();
+const product = ref(null);
+const loading = ref(true);
+const error = ref(null);
+
+const cart = useCart();
+
+const currentQuantity = computed(() => {
+  if (!product.value) return 0;
+  const list = Array.isArray(cart.items) ? cart.items : cart.items?.value || [];
+  const found = list.find((i) => i.id === product.value.id);
+  const qty = found ? found.quantity : 0;
+  return Number.isFinite(qty) ? Number(qty) : 0;
+});
+
+// Add to cart should only add once; quantity changes via +/- only
+const addToCartClick = () => {
+  if (!product.value) return;
+  if (currentQuantity.value === 0) {
+    cart.addToCart({
+      id: product.value.id,
+      title: product.value.title,
+      price: product.value.price,
+      image: product.value.image,
+    });
+  }
+};
+
+const increment = () => {
+  if (!product.value) return;
+
+  // If item is not in cart yet, add it first
+  if (currentQuantity.value === 0) {
+    cart.addToCart({
+      id: product.value.id,
+      title: product.value.title,
+      price: product.value.price,
+      image: product.value.image,
+    });
+  } else {
+    cart.updateQuantity(product.value.id, currentQuantity.value + 1);
+  }
+};
+
+const decrement = () => {
+  if (!product.value || currentQuantity.value === 0) return;
+  cart.updateQuantity(product.value.id, currentQuantity.value - 1);
+};
+
+const fetchProduct = async () => {
+  try {
+    loading.value = true;
+    const productId = props.id ?? route.params.id;
+    const p = await productService.getProductById(productId);
+    product.value = {
+      id: p?.id ?? p?.product_id ?? productId,
+      title: p?.title ?? p?.name ?? "Untitled",
+      description: p?.description ?? p?.details ?? "",
+      price: p?.price ?? 0,
+      image: p?.image ?? p?.image_url ?? p?.imagePath ?? "",
+      features: p?.features ?? [],
+    };
+  } catch (err) {
+    error.value = "Failed to fetch product details";
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchProduct();
+});
 </script>
-import cardItems from "./com"
 
 <template>
   <Header />
-  <section class="container mx-auto p-6">
-    <div class="flex items-start gap-[36px] max-md:flex-col">
-      <!-- LEFT: Product Image -->
-      <div class="flex-1 f">
-        <img src="../assets/shirt1.png" alt="Product Image" />
+
+  <div v-if="loading" class="text-center py-20">
+    <div
+      class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"
+    ></div>
+    <p class="mt-2 text-gray-600">Loading product details...</p>
+  </div>
+
+  <div v-else-if="error" class="text-center py-20">
+    <p class="text-red-600">{{ error }}</p>
+  </div>
+
+  <div v-else-if="product" class="container mx-auto px-4 py-8 md:py-16">
+    <div class="grid md:grid-cols-2 gap-8 items-start">
+      <div>
+        <img
+          :src="product.image"
+          :alt="product.title"
+          class="w-full rounded-lg object-cover"
+        />
       </div>
-
-      <!-- RIGHT: Product Details -->
-      <div class="flex-1">
-        <h1 class="mb-2 font-semibold text-[24px] text-[#565656]">JUNGEY</h1>
-        <p class="currency font-bold text-[24px] text-primary-600">Rs 1,600</p>
-        <p class="mt-2 text-sm text-dim">Shipping is calculated at checkout</p>
-        <p class="mt-3 mb-3 font-semibold font-base text-gray-600">
-          Choose Variant
+      <div>
+        <h1 class="text-3xl font-bold mb-4">{{ product.title }}</h1>
+        <p class="text-gray-600 mb-4">{{ product.description }}</p>
+        <p class="text-2xl font-bold text-black-600 mb-6">
+          ${{ product.price }}
         </p>
 
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-col items-start gap-3 mb-6">
+          <div class="flex items-center gap-3">
+            <button
+              @click="decrement"
+              class="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-lg hover:bg-gray-100"
+            >
+              -
+            </button>
+            <span class="min-w-8 text-center">{{ currentQuantity }}</span>
+            <button
+              @click="increment"
+              class="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-lg hover:bg-gray-100"
+            >
+              +
+            </button>
+          </div>
           <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
+            @click="addToCartClick"
+            class="px-6 py-3 rounded-md bg-[#ff922b] text-white font-medium hover:bg-[#fd7e14] transition-colors"
           >
-            <p class="text-center font-medium text-gray-700">White</p>
-          </button>
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">Red</p>
-          </button>
-
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">Black</p>
-          </button>
-        </div>
-
-        <p class="mt-3 mb-3 font-semibold font-base text-gray-600">
-          Choose Size
-        </p>
-
-        <div class="flex flex-wrap mb-3x gap-2">
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">S</p>
-          </button>
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">M</p>
-          </button>
-
-          <button
-            class="flex justify-center items-center cursor-pointer py-1 px-6 rounded-[4px] border text-base font-medium hover:bg-gray-50 transition-colors border-primary-500"
-          >
-            <p class="text-center font-medium text-gray-700">L</p>
+            Add to Cart
           </button>
         </div>
 
-        <!-- <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-minus"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            stroke-width="4"
-            stroke="#202020"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+        <h3 class="text-lg font-semibold mb-3">Features:</h3>
+        <ul class="list-disc list-inside space-y-2">
+          <li
+            v-for="feature in product.features || []"
+            :key="feature"
+            class="text-gray-700"
           >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg> -->
-
-        <div class="mt-[28px] flex gap-[6px]">
-          <button
-            class="btn-secondary border-gray-200 hover:bg-gray-50 h-[55px] w-[55px] p-0"
-          >
-            -
-          </button>
-          <button
-            class="btn-secondary border-gray-200 hover:bg-gray-50 h-[55px] w-[55px] p-0"
-          >
-            +
-          </button>
-
-          <a
-            href="#"
-            class="w-fit px-6 py-3 transition rounded-md border border-transparent bg-[#ff922b] px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-[#fd7e14] h-[55px]"
-            >ADD TO CART</a
-          >
-        </div>
-
-        <!-- 
-        <button
-          class="w-fit px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          Add to Cart
-        </button> -->
+            {{ feature }}
+          </li>
+        </ul>
       </div>
     </div>
-  </section>
+  </div>
 </template>
-
-<style scoped>
-.btn-secondary {
-  cursor: pointer;
-  border-style: var(--tw-border-style);
-  border-width: 1px;
-  border-color: var(--color-primary-500);
-  padding-inline: calc(var(--spacing) * 6);
-  padding-block: calc(var(--spacing) * 2);
-  --tw-font-weight: var(--font-weight-semibold);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-primary-500);
-  border-radius: 4px;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-}
-</style>
