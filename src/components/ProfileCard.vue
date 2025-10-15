@@ -4,7 +4,7 @@
   <div class="bg-white rounded-lg shadow-md p-6 text-center">
     <div class="flex flex-col items-center">
       <img
-        src="https://i.pravatar.cc/100"
+        src="../assets/logo.jpg"
         alt="Profile"
         class="w-24 h-24 rounded-full border-4 border-white -mt-12 shadow-md"
       />
@@ -37,9 +37,14 @@
     </div>
 
     <p class="mt-4 text-gray-500 text-sm leading-relaxed text-justify">
-      An artist of considerable range, Jenna the name taken by Melbourne-raised,
-      Brooklyn-based Nick Murphy writes, performs and records all of his own
-      music, giving it a warm, intimate feel with a solid groove structure.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+      veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+      commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+      velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+      cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
+      est laborum. music, giving it a warm, intimate feel with a solid groove
+      structure.
     </p>
   </div>
 </template>

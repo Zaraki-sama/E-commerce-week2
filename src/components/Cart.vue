@@ -3,24 +3,27 @@ import { ref, computed } from "vue";
 import Header from "./Header.vue";
 import { useCart } from "../stores/cart.js";
 
-const { items, cartTotal, removeFromCart, updateQuantity } = useCart();
+const cart = useCart();
 
 // Delivery charge
 const deliveryCharge = 170;
 
-// Total with delivery
+// Total with delivery - add safety checks
 const totalWithDelivery = computed(() => {
-  return cartTotal.value + deliveryCharge;
+  const subtotal = cart.cartTotal?.value ?? cart.cartTotal ?? 0;
+  console.log("Cart Total:", subtotal); // Debug
+  console.log("Cart Items:", cart.items); // Debug
+  return subtotal + deliveryCharge;
 });
 
 // Remove item from cart
 const handleRemoveItem = (productId) => {
-  removeFromCart(productId);
+  cart.removeFromCart(productId);
 };
 
 // Update item quantity
 const handleQuantityChange = (productId, newQuantity) => {
-  updateQuantity(productId, newQuantity);
+  cart.updateQuantity(productId, newQuantity);
 };
 </script>
 
@@ -33,7 +36,7 @@ const handleQuantityChange = (productId, newQuantity) => {
     </div>
 
     <!-- Empty Cart State -->
-    <div v-if="items.length === 0" class="text-center py-8">
+    <div v-if="cart.items.length === 0" class="text-center py-8">
       <p class="text-gray-500 mb-4">Your cart is empty</p>
       <RouterLink
         to="/"
@@ -46,7 +49,7 @@ const handleQuantityChange = (productId, newQuantity) => {
     <!-- Cart Items -->
     <div v-else>
       <div
-        v-for="item in items"
+        v-for="item in cart.items"
         :key="item.id"
         class="flex items-center gap-4 mb-6 w-full max-w-md"
       >
@@ -67,7 +70,7 @@ const handleQuantityChange = (productId, newQuantity) => {
             {{ item.title }}
           </p>
           <p class="currency mt-0.5 text-sm font-medium">
-            {{ item.price.toLocaleString() }}
+            {{ (item.price || 0).toLocaleString() }}
             <span class="text-xs text-dim">x {{ item.quantity }}</span>
           </p>
         </div>
@@ -100,10 +103,12 @@ const handleQuantityChange = (productId, newQuantity) => {
     </div>
 
     <!-- Totals Section -->
-    <div v-if="items.length > 0" class="w-full max-w-md mt-4 mb-6">
+    <div v-if="cart.items.length > 0" class="w-full max-w-md mt-4 mb-6">
       <div class="flex justify-between py-2 border-b border-gray-200">
         <p class="text-sm">Sub-total</p>
-        <p class="currency font-medium">{{ cartTotal.toLocaleString() }}</p>
+        <p class="currency font-medium">
+          {{ (cart.cartTotal || 0).toLocaleString() }}
+        </p>
       </div>
       <div class="flex justify-between py-2 border-b border-gray-200">
         <p class="text-sm">Delivery Charge</p>
@@ -113,13 +118,13 @@ const handleQuantityChange = (productId, newQuantity) => {
       </div>
       <div class="flex justify-between py-2 font-semibold text-lg">
         <p>Total</p>
-        <p class="currency">{{ totalWithDelivery.toLocaleString() }}</p>
+        <p class="currency">{{ (totalWithDelivery || 0).toLocaleString() }}</p>
       </div>
     </div>
 
     <!-- Place Order Button -->
     <button
-      v-if="items.length > 0"
+      v-if="cart.items.length > 0"
       class="w-full max-w-md px-6 py-3 transition rounded-md border border-transparent bg-[#ff922b] text-base font-medium text-white shadow-xs hover:bg-[#fd7e14] h-[55px] flex items-center justify-center"
       type="submit"
     >
