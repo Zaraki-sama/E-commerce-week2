@@ -1,4 +1,5 @@
 <template>
+   <Header />
   <div class="min-h-screen bg-neutral-50 py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <!-- Header -->
@@ -243,19 +244,19 @@
             <div class="space-y-4 mb-6">
               <div class="flex justify-between py-3 border-b border-neutral-200">
                 <span class="text-neutral-600 font-medium">Subtotal (1 item)</span>
-                <span class="font-semibold">¥ 2,699</span>
+                <span class="font-semibold">$ 2,699</span>
               </div>
               <div class="flex justify-between py-3 border-b border-neutral-200">
                 <span class="text-neutral-600 font-medium">Shipping</span>
-                <span class="font-semibold text-green-600">FREE</span>
+                <span class="font-semibold text-neutral-600">FREE</span>
               </div>
               <div class="flex justify-between py-3 border-b border-neutral-200">
                 <span class="text-neutral-600 font-medium">Discount</span>
-                <span class="font-semibold text-green-600">- ¥ 850</span>
+                <span class="font-semibold text-neutral-600">- $ 850</span>
               </div>
               <div class="flex justify-between py-4 border-t border-neutral-300">
                 <span class="text-lg font-bold text-neutral-900">TOTAL</span>
-                <span class="text-lg font-bold text-neutral-900">¥ 1,849</span>
+                <span class="text-lg font-bold text-neutral-900">$ 1,849</span>
               </div>
             </div>
 
@@ -311,6 +312,7 @@
 
 <script setup>
 import { ref, reactive, watch } from 'vue'
+import Header from "./Header.vue";
 
 // Reactive data
 const contact = reactive({
