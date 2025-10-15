@@ -19,7 +19,7 @@ import Header from "@/components/Header.vue";
       </div>
 
       <!-- Black dashboard container occupying top section -->
-      <div class="bg-black text-white">
+      <div class="bg-[#333333] text-white">
         <!-- Dashboard Navigation Header - Full width -->
         <header class="p-6">
           <h1 class="text-xl font-semibold uppercase tracking-wide">

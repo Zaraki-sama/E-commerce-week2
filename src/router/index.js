@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../components/Home.vue";
 import Login from "../components/Login.vue";
 import AdminDashboard from "../components/AdminDashboard.vue";
-
+import AdminProductList from "../components/AdminProductList.vue";
 import Details from "../components/Details.vue";
 import SignUp from "../components/SignUp.vue";
 import Cart from "../components/Cart.vue"; // If you have a Cart page
 import SearchResults from "../components/SearchResults.vue";
-
+import Checkout from "../components/Checkout.vue";
 const routes = [
   {
     path: "/",
@@ -44,6 +44,16 @@ const routes = [
     path: "/admindashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
+  }, 
+  {
+    path: "/adminlist",
+    name: "AdminProductList",
+    component: AdminProductList,
+  },
+  {
+    path: "/checkout",
+    name: "Checkout",
+    component: Checkout,
   },
 ];
 
