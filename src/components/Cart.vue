@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import Header from "./Header.vue";
 import { useCart } from "../stores/cart.js";
 
 const cart = useCart();
+const router = useRouter();
 
 // Delivery charge
 const deliveryCharge = 170;
@@ -25,6 +27,11 @@ const handleRemoveItem = (productId) => {
 const handleQuantityChange = (productId, newQuantity) => {
   cart.updateQuantity(productId, newQuantity);
 };
+
+// Navigate to checkout
+const handlePlaceOrder = () => {
+  router.push("/checkout");
+};
 </script>
 
 <template>
@@ -32,7 +39,7 @@ const handleQuantityChange = (productId, newQuantity) => {
   <div class="flex flex-col justify-center items-center px-6">
     <!-- Title -->
     <div>
-      <p class="font-semibold text-[28px] mb-6">Checkout</p>
+      <p class="font-semibold text-[28px] mb-6">Cart</p>
     </div>
 
     <!-- Empty Cart State -->
@@ -125,8 +132,9 @@ const handleQuantityChange = (productId, newQuantity) => {
     <!-- Place Order Button -->
     <button
       v-if="cart.items.length > 0"
-      class="w-full max-w-md px-6 py-3 transition rounded-md border border-transparent bg-[#ff922b] text-base font-medium text-white shadow-xs hover:bg-[#fd7e14] h-[55px] flex items-center justify-center"
-      type="submit"
+      @click="handlePlaceOrder"
+      class="w-full max-w-md px-6 py-3 transition rounded-md border border-transparent bg-black text-base font-medium text-white shadow-xs hover:bg-black h-[55px] flex items-center justify-center"
+      type="button"
     >
       Place Order
     </button>
