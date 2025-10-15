@@ -17,45 +17,31 @@ function closeSidebar() {
   }
 }
 
-// Navigation data
+// Navigation data - Updated with your actual routes
 const navigation = [
   {
-    title: "LAYOUT",
+    title: "ADMIN",
     items: [
-      { name: "Dashboard", path: "/admin/dashboard", icon: "fa-tv" },
-      { name: "Settings", path: "/admin/settings", icon: "fa-cog" },
-      { name: "List", path: "/admin/tables", icon: "fa-table" },
-      // { name: "Maps", path: "/admin/maps", icon: "fa-map-marked" },
+      { name: "Dashboard", path: "/admindashboard", icon: "fa-tv" },
+      { name: "Product List", path: "/adminlist", icon: "fa-table" },
     ],
   },
   {
-    title: "AUTHORIZATION",
+    title: "SHOP",
     items: [
-      { name: "Login", path: "/auth/login", icon: "fa-sign-in-alt" },
-      { name: "Register", path: "/auth/register", icon: "fa-user-plus" },
+      { name: "Home", path: "/", icon: "fa-home" },
+      { name: "Cart", path: "/cart", icon: "fa-shopping-cart" },
+      { name: "Checkout", path: "/checkout", icon: "fa-credit-card" },
+      { name: "Search", path: "/search", icon: "fa-search" },
     ],
   },
   {
-    title: "NO LAYOUT PAGES",
+    title: "ACCOUNT",
     items: [
-      { name: "Landing Page", path: "/landing", icon: "fa-home" },
-      { name: "Profile Page", path: "/profile", icon: "fa-user" },
-      { name: "Documentation", path: "/documentation", icon: "fa-book" },
+      { name: "Login", path: "/login", icon: "fa-sign-in-alt" },
+      { name: "Sign Up", path: "/signup", icon: "fa-user-plus" },
     ],
   },
-  {
-    title: "Styles",
-    items: [{ name: "CSS Components", path: "/styles/css", icon: "fa-css3" }],
-  },
-  // {
-  //   title: "Frameworks",
-  //   items: [
-  //     { name: "Angular", path: "/frameworks/angular", icon: "fa-angular" },
-  //     { name: "Javascript", path: "/frameworks/javascript", icon: "fa-js" },
-  //     { name: "NextJS", path: "/frameworks/nextjs", icon: "fa-react" },
-  //     { name: "React", path: "/frameworks/react", icon: "fa-react" },
-  //   ],
-  // },
 ];
 
 // Router instance
@@ -63,7 +49,13 @@ const router = useRouter();
 const route = useRoute();
 
 // Check if a route is active
-const isActiveRoute = (path) => route.path === path;
+const isActiveRoute = (path) => {
+  // Exact match for home route
+  if (path === "/" && route.path === "/") return true;
+  // For other routes, check if current path starts with the nav path
+  if (path !== "/" && route.path.startsWith(path)) return true;
+  return false;
+};
 
 // Handle navigation
 const navigateTo = (path) => {
@@ -128,7 +120,7 @@ const navigateTo = (path) => {
                   class="group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 cursor-pointer"
                   :class="
                     isActiveRoute(item.path)
-                      ? 'bg-blue-100 text-blue-700'
+                      ? 'bg-gray-200 text-gray-900'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   "
                 >
@@ -138,7 +130,7 @@ const navigateTo = (path) => {
                       item.icon,
                       'mr-3 flex-shrink-0',
                       isActiveRoute(item.path)
-                        ? 'text-blue-700'
+                        ? 'text-gray-900'
                         : 'text-gray-400 group-hover:text-gray-700',
                     ]"
                   ></i>
