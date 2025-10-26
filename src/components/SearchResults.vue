@@ -79,7 +79,7 @@
             <p class="text-gray-600 mb-4 text-sm leading-relaxed">
               {{ product.description }}
             </p>
-            <p class="text-xl font-bold text-[#ff922b] mb-4">
+            <p class="text-xl font-bold text-black mb-4">
               ${{ product.price }}
             </p>
           </div>
