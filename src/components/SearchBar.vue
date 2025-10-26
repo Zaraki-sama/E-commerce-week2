@@ -69,7 +69,7 @@
           </p>
           <button
             @click="goToSearchResults"
-            class="text-xs text-[#ff922b] hover:text-[#fd7e14] font-medium"
+            class="text-xs text-black hover:text-black font-medium"
           >
             View all
           </button>
@@ -90,7 +90,7 @@
               <p class="text-sm font-medium text-gray-900 truncate">
                 {{ product.title }}
               </p>
-              <p class="text-sm text-[#ff922b] font-semibold">
+              <p class="text-sm text-black font-semibold">
                 ${{ product.price }}
               </p>
             </div>
@@ -125,7 +125,7 @@
         </p>
         <button
           @click="goToSearchResults"
-          class="text-sm text-[#ff922b] hover:text-[#fd7e14] font-medium underline"
+          class="text-sm text-black hover:text-black font-medium underline"
         >
           Try different search terms
         </button>

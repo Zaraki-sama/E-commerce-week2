@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
+import { productService } from "@/services/api"; // Import productService instead of axios
 
 const productTitle = ref("");
 const category = ref("");
@@ -17,9 +17,6 @@ const details = ref("");
 const isSubmitting = ref(false);
 const submitMessage = ref("");
 const submitError = ref("");
-
-// Your Laravel API base URL
-const API_BASE_URL = "http://localhost:8000/api";
 
 function handleImageUpload(event) {
   const file = event.target.files[0];
@@ -62,7 +59,7 @@ async function handleSubmit() {
     // Filter out empty features
     const filteredFeatures = features.value.filter((f) => f.trim() !== "");
 
-    // Prepare the data - NOW INCLUDING category, stock, and status
+    // Prepare the data
     const productData = {
       title: productTitle.value,
       category: category.value || null,
@@ -75,30 +72,31 @@ async function handleSubmit() {
       features: filteredFeatures,
     };
 
-    // Send POST request to Laravel API
-    const response = await axios.post(`${API_BASE_URL}/products`, productData, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
+    // Use productService instead of direct axios call
+    const response = await productService.createProduct(productData);
 
     // Success!
     submitMessage.value = "Product added successfully!";
-    console.log("Product created:", response.data);
+    console.log("Product created:", response);
 
     // Reset form
     resetForm();
   } catch (error) {
     console.error("Error adding product:", error);
-    submitError.value =
-      error.response?.data?.message ||
-      "Failed to add product. Please try again.";
+    
+    // Check if it's an authentication error
+    if (error.response?.status === 401) {
+      submitError.value = "You must be logged in to add products. Please login and try again.";
+    } else {
+      submitError.value =
+        error.response?.data?.message ||
+        "Failed to add product. Please try again.";
 
-    // Show validation errors if any
-    if (error.response?.data?.errors) {
-      const errors = error.response.data.errors;
-      submitError.value = Object.values(errors).flat().join(", ");
+      // Show validation errors if any
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        submitError.value = Object.values(errors).flat().join(", ");
+      }
     }
   } finally {
     isSubmitting.value = false;

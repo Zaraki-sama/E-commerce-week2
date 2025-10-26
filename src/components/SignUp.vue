@@ -4,7 +4,7 @@
       <!-- Logo -->
       <div class="flex justify-center mb-8">
         <img
-          src="..\assets\logo.jpg"
+          src="../assets/logo.jpg"
           alt="Logo"
           class="max-h-16 mx-auto object-contain"
         />
@@ -16,13 +16,21 @@
         Create a new account to get started.
       </p>
 
+      <!-- Error/Success Message -->
+      <div
+        v-if="authStore.error"
+        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md mb-5"
+      >
+        {{ authStore.error }}
+      </div>
+
       <!-- Sign Up Form -->
       <form @submit.prevent="handleSignup" class="space-y-5">
         <div>
           <input
-            v-model="firstName"
+            v-model="form.name"
             type="text"
-            placeholder="First Name"
+            placeholder="Full Name"
             class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -30,27 +38,7 @@
 
         <div>
           <input
-            v-model="lastName"
-            type="text"
-            placeholder="Last Name"
-            class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-            required
-          />
-        </div>
-
-        <div>
-          <input
-            v-model="dob"
-            type="date"
-            placeholder="Date of Birth"
-            class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-            required
-          />
-        </div>
-
-        <div>
-          <input
-            v-model="email"
+            v-model="form.email"
             type="email"
             placeholder="Email address"
             class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
@@ -60,24 +48,39 @@
 
         <div>
           <input
-            v-model="password"
+            v-model="form.password"
             type="password"
-            placeholder="Password"
+            placeholder="Password (min 8 characters)"
             class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
             required
+            minlength="8"
+          />
+        </div>
+
+        <div>
+          <input
+            v-model="form.password_confirmation"
+            type="password"
+            placeholder="Confirm Password"
+            class="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+            minlength="8"
           />
         </div>
 
         <button
           type="submit"
-          class="w-full bg-black text-white py-3 rounded-full font-semibold hover:bg-gray-800 transition mt-2"
+          :disabled="authStore.loading"
+          class="w-full bg-black text-white py-3 rounded-full font-semibold hover:bg-gray-800 transition mt-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          Sign Up
+          {{ authStore.loading ? 'Creating Account...' : 'Sign Up' }}
         </button>
 
         <p class="text-center text-gray-600 mt-6">
           Already have an account?
-          <a href="#" class="text-black font-medium hover:underline">Log In</a>
+          <router-link to="/login" class="text-black font-medium hover:underline">
+            Log In
+          </router-link>
         </p>
       </form>
     </div>
@@ -85,28 +88,41 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 
-const firstName = ref("");
-const lastName = ref("");
-const dob = ref("");
-const email = ref("");
-const password = ref("");
+const router = useRouter();
+const authStore = useAuthStore();
 
-function handleSignup() {
-  // Replace with actual signup logic
-  console.log("First Name:", firstName.value);
-  console.log("Last Name:", lastName.value);
-  console.log("Date of Birth:", dob.value);
-  console.log("Email:", email.value);
-  console.log("Password:", password.value);
-}
+const form = reactive({
+  name: "",
+  email: "",
+  password: "",
+  password_confirmation: "",
+});
+
+const handleSignup = async () => {
+  // Clear any previous errors
+  authStore.error = null;
+
+  // Check if passwords match
+  if (form.password !== form.password_confirmation) {
+    authStore.error = "Passwords do not match";
+    return;
+  }
+
+  try {
+    await authStore.register(form);
+    // After successful registration, redirect to home
+    router.push('/');
+  } catch (error) {
+    console.error('Registration failed:', error);
+    // Error is already stored in authStore.error
+  }
+};
 </script>
 
 <style scoped>
-/* Ensure the date picker looks smooth */
-input[type="date"] {
-  color-scheme: light;
-  cursor: pointer;
-}
+/* Ensure smooth styling */
 </style>

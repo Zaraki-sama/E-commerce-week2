@@ -22,8 +22,8 @@ const navigation = [
   {
     title: "ADMIN",
     items: [
-      { name: "Dashboard", path: "/admindashboard", icon: "fa-tv" },
-      { name: "Product List", path: "/adminlist", icon: "fa-table" },
+      { name: "Dashboard", path: "/admin/dashboard", icon: "fa-tv" },
+      { name: "Product List", path: "/admin/list", icon: "fa-table" },
     ],
   },
   {

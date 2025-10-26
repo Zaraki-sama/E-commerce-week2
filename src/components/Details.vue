@@ -132,7 +132,7 @@ onMounted(() => {
           </div>
           <button
             @click="addToCartClick"
-            class="px-6 py-3 rounded-md bg-[#ff922b] text-white font-medium hover:bg-[#fd7e14] transition-colors"
+            class="px-6 py-3 rounded-md bg-black text-white font-medium hover:bg-[#cccccc] transition-colors"
           >
             Add to Cart
           </button>
