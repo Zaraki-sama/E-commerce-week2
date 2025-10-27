@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import AdminSidebar from "@/components/AdminSidebar.vue";
 import Header from "@/components/Header.vue";
 import { productService } from "@/services/api.js";
@@ -8,6 +8,8 @@ const products = ref([]);
 const searchQuery = ref("");
 const loading = ref(false);
 const error = ref(null);
+const openMenuId = ref(null); // Track which menu is open
+const deletingIds = ref(new Set()); // Track products being deleted
 
 // Fetch products from API
 const fetchProducts = async () => {
@@ -25,19 +27,53 @@ const fetchProducts = async () => {
   }
 };
 
+// Toggle menu visibility
+const toggleMenu = (productId) => {
+  if (openMenuId.value === productId) {
+    openMenuId.value = null;
+  } else {
+    openMenuId.value = productId;
+  }
+};
+
+// Close menu when clicking outside
+const handleClickOutside = (event) => {
+  // Check if click is outside menu
+  if (!event.target.closest('.menu-container')) {
+    openMenuId.value = null;
+  }
+};
+
 // Delete product
 const deleteProduct = async (id) => {
   if (!confirm("Are you sure you want to delete this product?")) {
     return;
   }
   
+  // Close the menu
+  openMenuId.value = null;
+  
+  // Add to deleting set
+  deletingIds.value.add(id);
+  
   try {
-    await productService.deleteProduct(id);
-    // Remove from local array
+    // Call Laravel API to delete product
+    const response = await productService.deleteProduct(id);
+    
+    // Remove from local array after successful deletion
     products.value = products.value.filter(p => p.id !== id);
+    
+    // Show success message from backend
+    const successMsg = response?.message || "Product deleted successfully";
+    alert(successMsg);
   } catch (err) {
-    alert("Failed to delete product");
+    // Show error message from backend
+    const errorMsg = err.response?.data?.message || "Failed to delete product. Please try again.";
+    alert(errorMsg);
     console.error("Error deleting product:", err);
+  } finally {
+    // Remove from deleting set
+    deletingIds.value.delete(id);
   }
 };
 
@@ -48,9 +84,21 @@ const filteredProducts = computed(() => {
   );
 });
 
+// Check if product is being deleted
+const isDeleting = (id) => {
+  return deletingIds.value.has(id);
+};
+
 // Fetch products on component mount
 onMounted(() => {
   fetchProducts();
+  // Add click listener to document
+  document.addEventListener('click', handleClickOutside);
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -100,9 +148,9 @@ onMounted(() => {
             </select>
             <select class="border rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
               <option>Category</option>
-              <option>Clothes</option>
-              <option>Shoes</option>
-              <option>Accessories</option>
+              <option>men</option>
+              <option>women</option>
+              <option>accessories</option>
             </select>
             <button
               @click="$router.push('/admin/products/add')"
@@ -139,6 +187,7 @@ onMounted(() => {
                 v-for="(product, index) in filteredProducts"
                 :key="product.id"
                 class="hover:bg-gray-50 transition-colors duration-200"
+                :class="{ 'opacity-50 pointer-events-none': isDeleting(product.id) }"
               >
                 <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -150,7 +199,7 @@ onMounted(() => {
                   />
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-gray-800 font-medium">{{ product.title }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ product.category || 'N/A' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500 capitalize">{{ product.category || 'N/A' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
                     :class="product.stock < 10 ? 'text-red-500 font-semibold' : 'text-gray-700'"
@@ -171,20 +220,33 @@ onMounted(() => {
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="relative group">
-                    <button class="text-gray-400 hover:text-gray-700 font-bold text-xl">
+                  <div class="relative menu-container">
+                    <!-- Deleting spinner -->
+                    <div v-if="isDeleting(product.id)" class="text-gray-400">
+                      <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
+                    </div>
+                    <!-- Menu button -->
+                    <button 
+                      v-else
+                      @click.stop="toggleMenu(product.id)"
+                      class="text-gray-400 hover:text-gray-700 font-bold text-xl focus:outline-none"
+                    >
                       •••
                     </button>
-                    <div class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg hidden group-hover:block z-10">
+                    <!-- Dropdown menu -->
+                    <div 
+                      v-if="openMenuId === product.id"
+                      class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg z-10 border border-gray-200"
+                    >
                       <button
                         @click="$router.push(`/admin/products/edit/${product.id}`)"
-                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md"
                       >
                         Edit
                       </button>
                       <button
                         @click="deleteProduct(product.id)"
-                        class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-b-md"
                       >
                         Delete
                       </button>

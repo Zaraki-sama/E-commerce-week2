@@ -40,7 +40,11 @@ const fetchCategories = async () => {
 };
 
 const navigateToCategory = (categorySlug) => {
-  router.push(`/products/${categorySlug}`);
+  // Navigate with query parameter instead of path parameter
+  router.push({ 
+    path: '/products', 
+    query: { category: categorySlug } 
+  });
   isCategoriesOpen.value = false;
 };
 
@@ -64,7 +68,7 @@ onMounted(() => {
       <div class="flex">
         <RouterLink to="/" class="-m-1.5 p-1.5">
           <span class="sr-only">Your Company</span>
-          <img src="../assets/logo.jpg" alt="" class="h-8 w-auto" />
+          <img src="../assets/fitty2.png" alt="" class="h-8 w-auto" />
         </RouterLink>
       </div>
 
@@ -72,44 +76,43 @@ onMounted(() => {
       <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 space-x-8">
         <RouterLink to="/" class="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">Home</RouterLink>
         
-<!-- Categories Dropdown -->
-<div 
-  class="relative"
-  @mouseenter="isCategoriesOpen = true"
-  @mouseleave="isCategoriesOpen = false"
->
-  <!-- Trigger -->
-  <button
-    class="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium flex items-center"
-  >
-    Categories
-    <svg 
-      class="w-4 h-4 ml-1 transition-transform duration-200" 
-      :class="{ 'rotate-180': isCategoriesOpen }"
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-    </svg>
-  </button>
-  
-  <!-- Menu -->
-  <div
-    v-if="isCategoriesOpen"
-    class="absolute top-full left-0 mt-0 w-48 bg-white rounded-md shadow-lg py-2 border border-gray-200 z-50"
-  >
-    <button
-      v-for="category in categories"
-      :key="category.id"
-      @click="navigateToCategory(category.slug)"
-      class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-    >
-      {{ category.name }}
-    </button>
-  </div>
-</div>
-
+        <!-- Categories Dropdown -->
+        <div 
+          class="relative"
+          @mouseenter="isCategoriesOpen = true"
+          @mouseleave="isCategoriesOpen = false"
+        >
+          <!-- Trigger -->
+          <button
+            class="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium flex items-center"
+          >
+            Categories
+            <svg 
+              class="w-4 h-4 ml-1 transition-transform duration-200" 
+              :class="{ 'rotate-180': isCategoriesOpen }"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Menu -->
+          <div
+            v-if="isCategoriesOpen"
+            class="absolute top-full left-0 mt-0 w-48 bg-white rounded-md shadow-lg py-2 border border-gray-200 z-50"
+          >
+            <button
+              v-for="category in categories"
+              :key="category.id"
+              @click="navigateToCategory(category.slug)"
+              class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
 
         <RouterLink to="/about" class="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">About</RouterLink>
         <RouterLink to="/contact" class="text-gray-900 hover:text-gray-700 px-3 py-2 text-sm font-medium">Contact</RouterLink>
