@@ -85,7 +85,7 @@ const navigateTo = (path) => {
         >
           <div class="flex items-center">
             <span class="text-gray-800 text-xl font-bold tracking-wider"
-              >KAMERO</span
+              >FITTY</span
             >
           </div>
           <button
