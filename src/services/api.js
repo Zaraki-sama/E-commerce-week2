@@ -230,105 +230,76 @@ export const userService = {
 };
 
 // ============================================
-// CART SERVICE (localStorage based)
+// CART SERVICE (server-based via API)
 // ============================================
 
 export const cartService = {
-  /**
-   * Get cart from localStorage
-   */
-  getCart() {
-    const cart = localStorage.getItem('cart');
-    return cart ? JSON.parse(cart) : [];
-  },
-
-  /**
-   * Add product to cart
-   */
-  addToCart(product, quantity = 1) {
-    const cart = this.getCart();
-    const existingItem = cart.find(item => item.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      cart.push({ ...product, quantity });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Dispatch custom event for cart updates
-    window.dispatchEvent(new CustomEvent('cart-updated', { 
-      detail: { cart, count: this.getCartCount() } 
+  async getCart() {
+    const response = await api.get('/cart');
+    const cart = response.data;
+    const items = Array.isArray(cart?.items) ? cart.items : [];
+    return items.map((i) => ({
+      id: i.product?.id ?? i.product_id,
+      title: i.product?.title,
+      image: resolveImageUrl(i.product?.image || i.product?.image_url),
+      price: Number(i.price) || Number(i.product?.price) || 0,
+      quantity: Number(i.quantity) || 0,
+      cartItemId: i.id,
     }));
-    
-    return cart;
   },
 
-  /**
-   * Remove product from cart
-   */
-  removeFromCart(productId) {
-    let cart = this.getCart();
-    cart = cart.filter(item => item.id !== productId);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    window.dispatchEvent(new CustomEvent('cart-updated', { 
-      detail: { cart, count: this.getCartCount() } 
-    }));
-    
-    return cart;
+  async addToCart(productId, quantity = 1) {
+    const response = await api.post('/cart', { product_id: productId, quantity });
+    const i = response.data;
+    return {
+      id: i.product?.id ?? i.product_id,
+      title: i.product?.title,
+      image: resolveImageUrl(i.product?.image || i.product?.image_url),
+      price: Number(i.price) || Number(i.product?.price) || 0,
+      quantity: Number(i.quantity) || 0,
+      cartItemId: i.id,
+    };
   },
 
-  /**
-   * Update product quantity in cart
-   */
-  updateQuantity(productId, quantity) {
-    const cart = this.getCart();
-    const item = cart.find(item => item.id === productId);
-
-    if (item) {
-      if (quantity <= 0) {
-        return this.removeFromCart(productId);
-      }
-      item.quantity = quantity;
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      window.dispatchEvent(new CustomEvent('cart-updated', { 
-        detail: { cart, count: this.getCartCount() } 
-      }));
-    }
-
-    return cart;
+  async updateQuantity(cartItemId, quantity) {
+    const response = await api.put(`/cart/${cartItemId}`, { quantity });
+    const i = response.data;
+    return {
+      id: i.product?.id ?? i.product_id,
+      title: i.product?.title,
+      image: resolveImageUrl(i.product?.image || i.product?.image_url),
+      price: Number(i.price) || Number(i.product?.price) || 0,
+      quantity: Number(i.quantity) || 0,
+      cartItemId: i.id,
+    };
   },
 
-  /**
-   * Get total number of items in cart
-   */
-  getCartCount() {
-    const cart = this.getCart();
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  async removeFromCart(cartItemId) {
+    await api.delete(`/cart/${cartItemId}`);
+    return true;
   },
+};
 
-  /**
-   * Get cart total price
-   */
-  getCartTotal() {
-    const cart = this.getCart();
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+// ============================================
+// ORDER + SHIPPING SERVICE
+// ============================================
+
+export const orderService = {
+  async checkoutFromCart() {
+    const response = await api.post('/orders/checkout');
+    return response.data; // order with items
   },
-
-  /**
-   * Clear entire cart
-   */
-  clearCart() {
-    localStorage.removeItem('cart');
-    
-    window.dispatchEvent(new CustomEvent('cart-updated', { 
-      detail: { cart: [], count: 0 } 
-    }));
-    
-    return [];
+  async getOrders() {
+    const response = await api.get('/orders');
+    return response.data;
+  },
+  async getOrder(orderId) {
+    const response = await api.get(`/orders/${orderId}`);
+    return response.data;
+  },
+  async submitShipping(orderId, payload) {
+    const response = await api.post(`/orders/${orderId}/shipping`, payload);
+    return response.data; // shipping record
   },
 };
 

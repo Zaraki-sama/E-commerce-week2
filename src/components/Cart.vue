@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Header from "./Header.vue";
 import { useCart } from "../stores/cart.js";
+import { orderService } from "../services/api";
 
 const cart = useCart();
 const router = useRouter();
@@ -12,26 +13,69 @@ const deliveryCharge = 170;
 
 // Total with delivery - add safety checks
 const totalWithDelivery = computed(() => {
-  const subtotal = cart.cartTotal?.value ?? cart.cartTotal ?? 0;
-  console.log("Cart Total:", subtotal); // Debug
-  console.log("Cart Items:", cart.items); // Debug
+  const subtotal = Number(cart.cartTotal?.value ?? 0);
   return subtotal + deliveryCharge;
 });
 
+// Track per-item updates to disable controls during API calls
+const updatingMap = ref({});
+// Force-list refresh key to re-render list after updates
+const refreshKey = ref(0);
+
+const setUpdating = (productId, val) => {
+  updatingMap.value = { ...updatingMap.value, [productId]: val };
+};
+
 // Remove item from cart
-const handleRemoveItem = (productId) => {
-  cart.removeFromCart(productId);
+const handleRemoveItem = async (productId) => {
+  setUpdating(productId, true);
+  try {
+    await cart.removeFromCart(productId);
+    // Full page reload as requested to reflect updates everywhere
+    window.location.reload();
+  } catch (e) {
+    console.error('Remove failed', e);
+    alert('Could not remove item. Please try again.');
+  } finally {
+    setUpdating(productId, false);
+  }
 };
 
 // Update item quantity
-const handleQuantityChange = (productId, newQuantity) => {
-  cart.updateQuantity(productId, newQuantity);
+const handleQuantityChange = async (productId, newQuantity) => {
+  setUpdating(productId, true);
+  try {
+    await cart.updateQuantity(productId, newQuantity);
+    // Full page reload as requested to reflect updates everywhere
+    window.location.reload();
+  } catch (e) {
+    console.error('Update quantity failed', e);
+    alert('Could not update quantity. Please try again.');
+  } finally {
+    setUpdating(productId, false);
+  }
 };
 
-// Navigate to checkout
-const handlePlaceOrder = () => {
-  router.push("/checkout");
+// Create order from cart then navigate to checkout
+const isPlacingOrder = ref(false);
+const handlePlaceOrder = async () => {
+  try {
+    isPlacingOrder.value = true;
+    const order = await orderService.checkoutFromCart();
+    localStorage.setItem('currentOrderId', String(order?.id));
+    router.push("/checkout");
+  } catch (e) {
+    console.error('Checkout failed', e);
+    alert('Could not proceed to checkout. Please try again.');
+  } finally {
+    isPlacingOrder.value = false;
+  }
 };
+
+onMounted(async () => {
+  // Always fetch latest cart when visiting the page
+  await cart.loadCart();
+});
 </script>
 
 <template>
@@ -65,8 +109,8 @@ const handlePlaceOrder = () => {
       <div v-else class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <!-- Left Column - Cart Items -->
         <div class="xl:col-span-2 space-y-6">
-          <!-- Cart Items -->
-          <div class="space-y-6">
+      <!-- Cart Items -->
+      <div class="space-y-6" :key="refreshKey">
             <div
               v-for="item in cart.items"
               :key="item.id"
@@ -102,8 +146,8 @@ const handlePlaceOrder = () => {
                       <button
                         @click="handleQuantityChange(item.id, item.quantity - 1)"
                         class="w-8 h-8 rounded-lg border border-neutral-300 flex items-center justify-center text-sm hover:bg-neutral-100 hover:border-neutral-400 transition-colors"
-                        :disabled="item.quantity <= 1"
-                        :class="{'opacity-50 cursor-not-allowed': item.quantity <= 1}"
+                        :disabled="item.quantity <= 1 || updatingMap[item.id]"
+                        :class="{'opacity-50 cursor-not-allowed': item.quantity <= 1 || updatingMap[item.id]}"
                       >
                         -
                       </button>
@@ -111,6 +155,8 @@ const handlePlaceOrder = () => {
                       <button
                         @click="handleQuantityChange(item.id, item.quantity + 1)"
                         class="w-8 h-8 rounded-lg border border-neutral-300 flex items-center justify-center text-sm hover:bg-neutral-100 hover:border-neutral-400 transition-colors"
+                        :disabled="updatingMap[item.id]"
+                        :class="{'opacity-50 cursor-not-allowed': updatingMap[item.id]}"
                       >
                         +
                       </button>
@@ -120,6 +166,8 @@ const handlePlaceOrder = () => {
                     <button
                       @click="handleRemoveItem(item.id)"
                       class="text-red-600 text-sm font-medium hover:text-red-700 transition-colors flex items-center gap-1"
+                      :disabled="updatingMap[item.id]"
+                      :class="{'opacity-50 cursor-not-allowed': updatingMap[item.id]}"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -152,7 +200,7 @@ const handlePlaceOrder = () => {
             <div class="space-y-4 mb-6">
               <div class="flex justify-between py-3 border-b border-neutral-200">
                 <span class="text-neutral-600 font-medium">Subtotal ({{ cart.items.length }} item{{ cart.items.length > 1 ? 's' : '' }})</span>
-                <span class="font-semibold">{{ (cart.cartTotal || 0).toLocaleString() }}</span>
+     <span class="font-semibold">{{ cart.cartTotal.toLocaleString() }}</span>
               </div>
               <div class="flex justify-between py-3 border-b border-neutral-200">
                 <span class="text-neutral-600 font-medium">Delivery Charge</span>
@@ -160,7 +208,7 @@ const handlePlaceOrder = () => {
               </div>
               <div class="flex justify-between py-4 border-t border-neutral-300">
                 <span class="text-lg font-bold text-neutral-900">TOTAL</span>
-                <span class="text-lg font-bold text-neutral-900">{{ (totalWithDelivery || 0).toLocaleString() }}</span>
+               <span class="text-lg font-bold text-neutral-900">{{ totalWithDelivery.toLocaleString() }}</span>
               </div>
             </div>
 

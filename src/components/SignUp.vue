@@ -11,7 +11,7 @@
       </div>
 
       <!-- Title -->
-      <h1 class="text-center text-2xl font-bold mb-3">KAMERO SIGN UP</h1>
+      <h1 class="text-center text-2xl font-bold mb-3">FITTY SIGN UP</h1>
       <p class="text-center text-gray-600 mb-8">
         Create a new account to get started.
       </p>
