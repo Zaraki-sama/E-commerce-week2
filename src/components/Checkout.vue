@@ -313,6 +313,7 @@
 <script setup>
 import { ref, reactive, watch } from 'vue'
 import Header from "./Header.vue";
+import { orderService } from "../services/api";
 
 // Reactive data
 const contact = reactive({
@@ -362,7 +363,8 @@ watch(sameAsShipping, (newValue) => {
 })
 
 // Handle form submission
-const handleContinue = () => {
+const isSubmitting = ref(false)
+const handleContinue = async () => {
   // Reset errors
   Object.keys(errors).forEach(key => {
     errors[key] = false
@@ -391,17 +393,34 @@ const handleContinue = () => {
     hasErrors = true
   }
 
-  if (!hasErrors) {
-    // Proceed with checkout
-    console.log('Proceeding to checkout with:', {
-      contact,
-      shipping,
-      billing: sameAsShipping.value ? shipping : billing,
-      delivery: selectedDelivery.value
-    })
-    
-    // In a real application, you would submit the data to your backend
-    alert('Order placed successfully!')
+  if (hasErrors) return
+
+  const orderId = localStorage.getItem('currentOrderId')
+  if (!orderId) {
+    alert('No pending order. Please go back to cart and try again.')
+    return
+  }
+
+  const payload = {
+    full_name: shipping.name,
+    address: shipping.address,
+    city: shipping.city,
+    postal_code: shipping.postalCode,
+    phone: shipping.phone,
+    shipping_method: selectedDelivery.value,
+  }
+
+  try {
+    isSubmitting.value = true
+    await orderService.submitShipping(orderId, payload)
+    // clear current order context
+    localStorage.removeItem('currentOrderId')
+    alert('Order completed successfully!')
+  } catch (e) {
+    console.error('Submit shipping failed', e)
+    alert('Could not complete order. Please try again.')
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>

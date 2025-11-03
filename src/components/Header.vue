@@ -126,6 +126,16 @@ onMounted(() => {
         
         <!-- User / Logout -->
         <div v-if="authStore.isAuthenticated" class="flex items-center gap-x-2">
+          <!-- Profile Icon -->
+          <RouterLink
+            to="/profile"
+            class="flex items-center justify-center p-2 text-gray-900 hover:bg-gray-100 rounded-full"
+            aria-label="Profile"
+          >
+            <i class="fas fa-user text-xl"></i>
+          </RouterLink>
+          
+          <!-- Logout Icon -->
           <RouterLink
             to="#"
             @click.prevent="handleLogout"

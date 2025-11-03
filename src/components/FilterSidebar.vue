@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-6 rounded-lg shadow-sm">
+  <div class="bg-white p-6 shadow-sm">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-lg font-semibold text-gray-900">FILTER & SORT</h2>
@@ -82,7 +82,7 @@ const filterSections = [
   {
     key: 'size',
     title: 'SIZE',
-    options: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size']
+    options: ['S', 'M', 'L', 'XL']
   }
 ]
 

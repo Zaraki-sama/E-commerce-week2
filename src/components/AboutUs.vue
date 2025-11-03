@@ -104,6 +104,7 @@
         </section>
       </div>
     </main>
+     <Newsletter />
   </div>
 </template>
 
@@ -116,6 +117,7 @@ const leaders = ref([
   { name: 'Noel Mack', title: 'Chief Brand Officer' }
 ])
 import Header from "./Header.vue";
+import Newsletter from "./Newsletter.vue"
 </script>
 
 <style scoped>
