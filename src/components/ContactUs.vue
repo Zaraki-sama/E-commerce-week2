@@ -173,12 +173,14 @@
         </div>
       </div>
     </main>
+     <Newsletter />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
 import Header from "./Header.vue";
+import Newsletter from "./Newsletter.vue"
 
 // Form data
 const form = reactive({

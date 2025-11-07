@@ -80,6 +80,7 @@
         </div>
       </section>
     </main>
+    <Newsletter class="mt-16"/>
   </div>
 </template>
 
@@ -87,6 +88,7 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import Header from './Header.vue'
+import Newsletter from './Newsletter.vue'
 import ProductCard from './ProductCard.vue'
 import FilterSidebar from './FilterSidebar.vue'
 import { productService } from '../services/api'
